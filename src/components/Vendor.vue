@@ -30,8 +30,8 @@
   </div>
 
   <div class="row">
-    <div class="col-sm-1"><button class="btn btn-lg btn-success">Buy</button></div>
-    <div class="col-sm-1"><button class="btn btn-lg btn-danger">Clear</button></div>
+    <div class="col-sm-1"><button class="btn btn-lg btn-success" @click="newOrder()">Buy</button></div>
+    <div class="col-sm-1"><button class="btn btn-lg btn-danger" @click="clearSelection()">Clear</button></div>
     <div class="col-sm-3"><h4>Selected Items {{itemsCount}}</h4></div>
   </div>
 
@@ -43,14 +43,33 @@
 import { Component, Prop, Vue } from 'vue-property-decorator';
 //import {ProductQueryModel} from '../models/product-query-model';
 import QueryDataService from '../services/query-data-service';
+import NewOrderCommandService from '../services/new-order-command-service';
+
+import {salesOrder} from '../models/sales-order';
+import { orderDetails } from "../models/order-detail";
+import { paymentDetails } from "../models/payment-details";
 
 @Component
 export default class Vendor extends Vue {
   @Prop() private msg!: string;
   itemsCount = 0;
   public inventory: any[] = [];
+  private salesOrder!: salesOrder;
 
-    retrieveTutorials() {
+  //Mock data
+  private orderDetailsMock: orderDetails[] = [
+    // {orderId: 0, productId: 1, quantity: 2, lineItemTotal: 3, orderDate: "2021-03-06"},
+    // {orderId: 0, productId: 4, quantity: 1, lineItemTotal: 1, orderDate: "2021-03-06"}
+
+    {orderId: 0, productId: 2, quantity: 1, lineItemTotal: 1.75, orderDate: "2021-03-06"},
+    {orderId: 0, productId: 3, quantity: 1, lineItemTotal: 1.50, orderDate: "2021-03-06"}
+  ];
+  //Mock data
+  private paymentDetailsMock: paymentDetails = {
+    paymentId: 0, amount: 4, amountPaid: 4, paymentDate: "2021-03-06", amountReturned: 0
+    }
+  
+    retrieveProducts() {
     QueryDataService.getAll()
       .then((response: any) => {
         this.inventory = response.data.data;
@@ -62,7 +81,7 @@ export default class Vendor extends Vue {
   }
 
   mounted(){
-    this.retrieveTutorials();
+    this.retrieveProducts();
     console.log('mounted');
   }
 
@@ -71,6 +90,38 @@ export default class Vendor extends Vue {
       this.itemsCount = 0;
     }
     this.itemsCount++;
+  }
+
+  clearSelection(){
+    this.itemsCount = 0;
+    ///clear the selected items as well
+  }
+
+  newOrder(){  
+
+    alert('Order created with Mock data');
+    this.salesOrder = {
+      orderDetails: this.orderDetailsMock,
+      paymentDetails: this.paymentDetailsMock
+    };
+
+    console.log(JSON.stringify(this.salesOrder));
+
+    NewOrderCommandService.newOrder(this.salesOrder)
+    .then((response: any) => {        
+        console.log(JSON.stringify(response.data));
+        if(response.data.isSuccess === true){
+          alert('Success!!!\nPlease collect your items!!');
+        }
+        else{
+          alert('Sorry an error occured');
+        }
+        
+      })
+      .catch((e: any) => {
+        console.log(e);
+      });
+
   }
   
 }
