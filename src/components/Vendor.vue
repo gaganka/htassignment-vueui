@@ -30,10 +30,26 @@
   </div>
 
   <div class="row" v-show="itemsCount >= 1">
-    <div class="col-sm-1">$1</div>
-    <div class="col-sm-1">0.25</div>
-    <div class="col-sm-1">0.10</div>
-    <div class="col-sm-1">0.5</div>
+    <div class="col-sm-1">
+      $1<br/>
+      <button class="btn btn-outline-success rounded-circle"
+              @click="addCredit($event,1)" v-show="creditAmount < orderTotal">+</button>      
+    </div>
+    <div class="col-sm-1">
+      0.25<br/>
+      <button class="btn btn-outline-success rounded-circle"
+              @click="addCredit($event,0.25)" v-show="creditAmount < orderTotal">+</button>      
+    </div>
+    <div class="col-sm-1">
+      0.10<br/>
+      <button class="btn btn-outline-success rounded-circle"
+              @click="addCredit($event,0.10)" v-show="creditAmount < orderTotal">+</button>      
+    </div>
+    <div class="col-sm-1">
+      0.5<br/>
+      <button class="btn btn-outline-success rounded-circle"
+              @click="addCredit($event,0.05)" v-show="creditAmount < orderTotal">+</button>      
+    </div>
   </div>
   
   <hr/>
@@ -64,6 +80,7 @@ export default class Vendor extends Vue {
   @Prop() private msg!: string;
   itemsCount = 0;
   orderTotal = 0;
+  creditAmount = 0;
   public inventory: any[] = [];
   private salesOrder!: salesOrder;
 
@@ -135,11 +152,17 @@ export default class Vendor extends Vue {
     console.log(JSON.stringify(this.vendOrder));
   }
 
+  addCredit(event: any, amount: any){
+    this.creditAmount += amount;
+    console.log("Credits: " + this.creditAmount);
+  }
+
   clearSelection(){
     if(confirm('Clear your selection?')){
       this.itemsCount = 0;
       this.orderTotal = 0;
       this.vendOrder = [];
+      this.creditAmount = 0;
     }    
     ///clear the selected items as well
   }
