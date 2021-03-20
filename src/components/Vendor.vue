@@ -59,6 +59,7 @@
     <div class="col-sm-1"><button class="btn btn-lg btn-danger" @click="clearSelection()" :disabled='itemsCount === 0'>Clear</button></div>
     <div class="col-sm-3"><h4>Selected Items {{itemsCount}}</h4></div>
     <div class="col-sm-3"><h4>Order Total {{orderTotal}}</h4></div>
+    <div class="col-sm-3"><h4>Your Credit {{creditAmount}}</h4></div>
   </div>
 
 </div>
@@ -173,9 +174,9 @@ export default class Vendor extends Vue {
     this.orderPayment = {
       paymentId: 0, 
       amount: this.orderTotal, 
-      amountPaid: this.orderTotal, 
+      amountPaid: this.creditAmount, 
       paymentDate: "2021-03-06", 
-      amountReturned: 0
+      amountReturned: (this.creditAmount - this.orderTotal)
     }
 
     //alert('Order created with Mock data');
@@ -190,11 +191,20 @@ export default class Vendor extends Vue {
     .then((response: any) => {        
         console.log(JSON.stringify(response.data));
         if(response.data.isSuccess === true){
-          alert('Success!!!\nPlease collect your items!!');
+          let str: string;
+          if(response.data.amountReturned > 0){
+            str = "Your change : " + response.data.amountReturned + " " + response.data.nominals;
+          }
+          else{
+            str = "";
+          }
+
+          alert('Success!!!\nPlease collect your items!!\n' + str);
 
           this.itemsCount = 0;
           this.orderTotal = 0;
-          this.vendOrder = [];          
+          this.vendOrder = [];
+          this.creditAmount = 0;
         }
         else{
           alert('Sorry an error occured');
